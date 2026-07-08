@@ -1,0 +1,7 @@
+# No third-party requirements needed.
+# This project is built entirely on the Python 3 standard library.
+# urllib
+# socket
+# json
+# re
+# http.server
