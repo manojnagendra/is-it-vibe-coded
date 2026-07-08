@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Detector | Inspect AI Footprints</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Abstract Background Lights -->
+    <div class="bg-glow bg-glow-violet"></div>
+    <div class="bg-glow bg-glow-pink"></div>
+    <div class="bg-glow bg-glow-cyan"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="pulse-dot"></span>
+                <span class="logo-text">VIBE<span>CODE</span></span>
+                <span class="badge-beta">v1.2</span>
+            </div>
+            <h1>Is it Vibe Coded?</h1>
+            <p class="subtitle">Scan any website or app to detect AI scaffolding, Tailwind saturation, and prompt-engineered footprints.</p>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-content">
+            <div class="left-column">
+                <!-- SCAN CARD -->
+                <section class="card glass-card scan-card">
+                    <div class="card-header">
+                        <h2>Start Website Audit</h2>
+                        <p>Enter a public URL to auto-scrape, or enter a name to configure a profile.</p>
+                    </div>
+                    
+                    <div class="scan-inputs">
+                        <div class="input-wrapper">
+                            <span class="input-icon">🔗</span>
+                            <input type="text" id="url-input" placeholder="e.g., lovable.dev, stripe.com, or App Name" autocomplete="off">
+                        </div>
+                        <div class="scan-actions">
+                            <button id="btn-scan" class="btn btn-primary">
+                                <span class="btn-text">Run Deep Scan</span>
+                                <span class="btn-glow"></span>
+                            </button>
+                            <button id="btn-manual-open" class="btn btn-secondary">
+                                📋 Manual Audit Wizard
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TERMINAL LOGGER (Appears during Scan) -->
+                    <div id="scan-terminal" class="terminal-panel hidden">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="terminal-title">vibe-analyzer --verbose</span>
+                        </div>
+                        <div id="terminal-body" class="terminal-body">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AUDIT RESULT DASHBOARD (Hidden initially) -->
+                <section id="result-dashboard" class="result-dashboard hidden">
+                    <!-- Top Summary Card -->
+                    <div class="card glass-card main-result-card">
+                        <div class="result-top-grid">
+                            <div class="score-circle-wrapper">
+                                <svg class="progress-ring" width="160" height="160">
+                                    <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.03)" stroke-width="12" fill="transparent" r="70" cx="80" cy="80"/>
+                                    <circle id="progress-ring-bar" class="progress-ring-bar" stroke="url(#gradient-vibe)" stroke-width="12" fill="transparent" r="70" cx="80" cy="80" stroke-dasharray="439.8" stroke-dashoffset="439.8"/>
+                                    <defs>
+                                        <linearGradient id="gradient-vibe" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#8b5cf6" />
+                                            <stop offset="100%" stop-color="#ec4899" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div class="score-display">
+                                    <span id="score-num">0</span>
+                                    <span class="score-label">VIBE INDEX</span>
+                                </div>
+                            </div>
+                            <div class="verdict-info">
+                                <div id="grade-badge" class="badge">AI SCATTERED</div>
+                                <h3 id="target-title">Target Website</h3>
+                                <a id="target-link" href="#" target="_blank" class="target-link">https://domain.com ↗</a>
+                                <p id="verdict-text" class="verdict-desc">Analyzing...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="metrics-grid">
+                        <!-- Metric 1: Tailwind -->
+                        <div class="card glass-card metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">🎨</span>
+                                <h4>Tailwind Saturation</h4>
+                            </div>
+                            <div class="metric-value">
+                                <span id="metric-tailwind-val">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="metric-tailwind-bar" class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <p class="metric-desc">Density of generic utility styling syntax in DOM assets.</p>
+                        </div>
+
+                        <!-- Metric 2: Lucide -->
+                        <div class="card glass-card metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">✨</span>
+                                <h4>Lucide React Footprint</h4>
+                            </div>
+                            <div class="metric-value">
+                                <span id="metric-lucide-val">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="metric-lucide-bar" class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <p class="metric-desc">Occurrence density of standard AI-favored SVG vector icon wrappers.</p>
+                        </div>
+
+                        <!-- Metric 3: Shadcn + Radix -->
+                        <div class="card glass-card metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">🧱</span>
+                                <h4>Shadcn/Radix Scaffolds</h4>
+                            </div>
+                            <div class="metric-value">
+                                <span id="metric-shadcn-val">NOT DETECTED</span>
+                            </div>
+                            <p class="metric-desc font-accent">Radix state attributes and standard tailwind component layers.</p>
+                        </div>
+
+                        <!-- Metric 4: Framework -->
+                        <div class="card glass-card metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">⚙️</span>
+                                <h4>Detected Framework</h4>
+                            </div>
+                            <div class="metric-value">
+                                <span id="metric-framework-val">NextJS</span>
+                            </div>
+                            <p class="metric-desc font-accent">Underlying web framework signature extracted from headers/DOM.</p>
+                        </div>
+
+                        <!-- Metric 5: Platform Signature -->
+                        <div class="card glass-card metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">⚡</span>
+                                <h4>AI Builder Origin</h4>
+                            </div>
+                            <div class="metric-value">
+                                <span id="metric-builder-val">Lovable</span>
+                            </div>
+                            <p class="metric-desc font-accent">Matched source indicators correlating with prompt-engines.</p>
+                        </div>
+
+                        <!-- Metric 6: Ship Velocity -->
+                        <div class="card glass-card metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">⏳</span>
+                                <h4>Ship-to-Market Cadence</h4>
+                            </div>
+                            <div class="metric-value">
+                                <span id="metric-speed-val">Days</span>
+                            </div>
+                            <p class="metric-desc font-accent">Estimated engineering cycle based on tech debt profiles.</p>
+                        </div>
+                    </div>
+
+                    <!-- Community Consensus & Voting -->
+                    <div class="card glass-card voting-card">
+                        <h3>Community Consensus</h3>
+                        <p>Does the internet agree with this vibe score? Vote to help calibration.</p>
+                        
+                        <div class="vote-bars">
+                            <div class="vote-option">
+                                <div class="vote-label-row">
+                                    <span>VIBE CODED</span>
+                                    <span id="vote-vibe-pct">50%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div id="vote-vibe-bar" class="progress-bar vote-bar-vibe" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div class="vote-option">
+                                <div class="vote-label-row">
+                                    <span>HAND CRAFTED</span>
+                                    <span id="vote-hand-pct">50%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div id="vote-hand-bar" class="progress-bar vote-bar-hand" style="width: 50%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vote-buttons">
+                            <button id="btn-vote-vibe" class="btn btn-vote btn-vote-vibe">🔥 Vibe Coded (+<span id="vote-vibe-count">0</span>)</button>
+                            <button id="btn-vote-hand" class="btn btn-vote btn-vote-hand">🛠️ Hand Crafted (+<span id="vote-hand-count">0</span>)</button>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="card glass-card comments-card">
+                        <h3>Auditor Notes & Comments</h3>
+                        <div id="comments-list" class="comments-list">
+                            <!-- Injected comments -->
+                        </div>
+                        <form id="comment-form" class="comment-form">
+                            <input type="text" id="comment-author" placeholder="Nickname" required autocomplete="off">
+                            <div class="textarea-wrapper">
+                                <textarea id="comment-text" placeholder="Add custom notes on codebase hints, bugs or velocity..." required rows="2" maxlength="200"></textarea>
+                                <button type="submit" class="btn btn-submit">Post Note</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+            <!-- RIGHT COLUMN (HISTORY & HALL OF FAME) -->
+            <div class="right-column">
+                <section class="card glass-card history-card">
+                    <div class="history-header">
+                        <h2>Audit Registry</h2>
+                        <span class="pulse-glow">LIVE</span>
+                    </div>
+                    <p class="sec-desc">Recently audited domains and profiles.</p>
+                    <div class="search-history-wrapper">
+                        <input type="text" id="history-search" placeholder="Search past audits..." autocomplete="off">
+                    </div>
+                    <div id="history-list" class="history-list">
+                        <!-- Dynamic list -->
+                        <div class="loader-history">Loading Registry...</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MANUAL AUDIT MODAL -->
+    <div id="manual-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>📋 Manual Vibe Diagnostics</h2>
+                <button id="btn-manual-close" class="btn-close">&times;</button>
+            </div>
+            <p class="modal-intro">Analyze an app behind a wall, or on local dev. Answer these structural questions to estimate its vibe score.</p>
+            
+            <form id="manual-audit-form">
+                <!-- Q1 -->
+                <div class="form-group">
+                    <label>What styling system is used?</label>
+                    <div class="radio-cards">
+                        <label class="radio-card">
+                            <input type="radio" name="tailwind" value="yes" checked>
+                            <span class="card-box">
+                                <span class="title">Tailwind CSS</span>
+                                <span class="desc">Tons of style classes directly in DOM attributes.</span>
+                            </span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="tailwind" value="no">
+                            <span class="card-box">
+                                <span class="title">Bespoke CSS / Stylesheet</span>
+                                <span class="desc">Standard standalone stylesheets, sparse class arrays.</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="form-group">
+                    <label>Does it feature standard Lucide React icons?</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="check-lucide" checked>
+                        <label for="check-lucide">Yes, features standard simple linear vectors (arrows, cogs, checkmarks) on almost every button/input.</label>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="form-group">
+                    <label>Does it use standard Shadcn/Radix elements?</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="check-shadcn" checked>
+                        <label for="check-shadcn">Yes, standard popover overlays, dropdowns, glass cards, and dialog modules with spring-based motion curves.</label>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="form-group">
+                    <label>Presence of LLM-generated layout copy clichés?</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="check-cliche">
+                        <label for="check-cliche">Yes, copy has headings like "Streamline your workflow", "Revolutionize productivity", or "Crafted with Love".</label>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="form-group">
+                    <label>Are there any obvious prototyping signs?</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="check-broken">
+                        <label for="check-broken">Yes, broken secondary buttons, buttons that only show mock notifications, placeholder text, or minor alignment bugs.</label>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="form-group">
+                    <label>Is Google Analytics or Tag Manager present?</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="check-no-analytics" checked>
+                        <label for="check-no-analytics">No, there are no analytics script tracking triggers (very typical for fast weekend AI prototyping).</label>
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="form-group">
+                    <label>How fast was this app designed and shipped?</label>
+                    <select name="speed" class="form-select">
+                        <option value="hours">⚡ Prompted in hours / live prototype</option>
+                        <option value="weekend" selected>📅 Built over a single weekend</option>
+                        <option value="weeks">🛠️ Dynamic development over several weeks</option>
+                        <option value="months">🧱 Rigorous engineering over months/years</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Profile Identifier (Name/URL)</label>
+                    <input type="text" id="manual-name" placeholder="e.g., Custom Dashboard" required autocomplete="off">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btn-manual-cancel" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Vibe Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
