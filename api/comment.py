@@ -39,8 +39,9 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length).decode('utf-8')
+        content_length_header = self.headers.get('Content-Length')
+        content_length = int(content_length_header) if content_length_header else 0
+        post_data = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else "{}"
         
         try:
             payload = json.loads(post_data)
