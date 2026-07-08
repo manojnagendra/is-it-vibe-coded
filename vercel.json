@@ -18,6 +18,10 @@
       "destination": "/api/comment.py"
     },
     {
+      "source": "/api/clear",
+      "destination": "/api/clear.py"
+    },
+    {
       "source": "/(.*)",
       "destination": "/public/$1"
     }

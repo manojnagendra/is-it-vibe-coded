@@ -661,16 +661,20 @@ class VibeHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(b"Not Found")
 
     def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length).decode('utf-8')
+        content_length_header = self.headers.get('Content-Length')
+        content_length = int(content_length_header) if content_length_header else 0
         
-        try:
-            payload = json.loads(post_data)
-        except Exception:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Invalid JSON"}).encode('utf-8'))
-            return
+        payload = {}
+        if content_length > 0:
+            post_data = self.rfile.read(content_length).decode('utf-8')
+            try:
+                payload = json.loads(post_data)
+            except Exception:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Invalid JSON"}).encode('utf-8'))
+                return
 
         # API: run website audit
         if self.path == "/api/audit":
@@ -846,8 +850,122 @@ class VibeHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(report).encode('utf-8'))
             else:
                 self.send_response(404)
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": "Audit not found"}).encode('utf-8'))
+            return
+
+        # API: reset registry to seeds
+        if self.path == "/api/clear":
+            seed_data = [
+                {
+                    "id": "1",
+                    "name": "Stripe",
+                    "url": "https://stripe.com",
+                    "score": 6,
+                    "grade": "Crafted Artisan Code",
+                    "verdict": "Stripe's interface is an absolute masterpiece of handcrafted styling, custom animations, and bespoke typography. Almost zero indicators of rapid AI generation.",
+                    "analysis": {
+                        "tailwind_density": 0,
+                        "lucide_density": 0,
+                        "llm_cliche_count": 0,
+                        "radix_shadcn_presence": False,
+                        "framework": "Custom React / Next.js",
+                        "builder_sig": "None",
+                        "analytics_present": True,
+                        "css_complexity": "Extreme Custom",
+                        "speed_indicator": "Months of Engineering"
+                    },
+                    "votes_vibe": 1,
+                    "votes_hand": 98,
+                    "comments": [
+                        {"author": "DevPurist", "text": "They manually align vectors to the pixel grid. Def not vibe coded.", "date": "2026-07-08T12:00:00Z"},
+                        {"author": "StripeFan", "text": "Their animations are custom canvas shaders. Top tier hand-craft.", "date": "2026-07-08T12:10:00Z"}
+                    ],
+                    "date": "2026-07-08T10:00:00Z"
+                },
+                {
+                    "id": "2",
+                    "name": "Bolt.new",
+                    "url": "https://bolt.new",
+                    "score": 96,
+                    "grade": "AI-Orchestrated Masterpiece",
+                    "verdict": "Bolt.new is a flag-bearer of the vibe coding revolution! It utilizes heavy Tailwind classes, Lucide icons, Radix UI primitives, and has an incredibly rapid release cadence reflecting prompt-driven development.",
+                    "analysis": {
+                        "tailwind_density": 95,
+                        "lucide_density": 85,
+                        "llm_cliche_count": 3,
+                        "radix_shadcn_presence": True,
+                        "framework": "Vite / React",
+                        "builder_sig": "Bolt / Stackblitz",
+                        "analytics_present": True,
+                        "css_complexity": "Utility CSS Utility-Heavy",
+                        "speed_indicator": "Ultra-Fast AI Iteration"
+                    },
+                    "votes_vibe": 142,
+                    "votes_hand": 2,
+                    "comments": [
+                        {"author": "KarpathyVibes", "text": "This is vibe coding in its purest, most beautiful form.", "date": "2026-07-08T10:30:00Z"},
+                        {"author": "PromptEng", "text": "Built in record time, features shipping hourly.", "date": "2026-07-08T11:00:00Z"}
+                    ],
+                    "date": "2026-07-08T11:15:00Z"
+                },
+                {
+                    "id": "3",
+                    "name": "Apple",
+                    "url": "https://apple.com",
+                    "score": 2,
+                    "grade": "Corporate Hand-Crafted",
+                    "verdict": "Apple relies on heavy custom styling sheets, highly structured grid systems, custom web components, and rigorous pixel perfection. Zero AI scaffolding templates detected.",
+                    "analysis": {
+                        "tailwind_density": 0,
+                        "lucide_density": 0,
+                        "llm_cliche_count": 0,
+                        "radix_shadcn_presence": False,
+                        "framework": "Custom Web Components / HTML5",
+                        "builder_sig": "None",
+                        "analytics_present": True,
+                        "css_complexity": "Highly Rigid Bespoke",
+                        "speed_indicator": "Generations of Design Iterations"
+                    },
+                    "votes_vibe": 0,
+                    "votes_hand": 210,
+                    "comments": [
+                        {"author": "iDesigner", "text": "Apple will hire 50 engineers to argue about a 1px border radius. Definitely hand coded.", "date": "2026-07-08T11:20:00Z"}
+                    ],
+                    "date": "2026-07-08T11:30:00Z"
+                },
+                {
+                    "id": "4",
+                    "name": "QuickVibe Todo",
+                    "url": "https://quick-vibe-todo.lovable.app",
+                    "score": 99,
+                    "grade": "100% Pure Vibe Scaffolding",
+                    "verdict": "Confirmed to be hosted on Lovable! Uses standard Lucide React icons, Tailwind CSS classes, Shadcn Dialogs, and classic LLM layout blueprints. Excellent functional prototype created entirely via prompts.",
+                    "analysis": {
+                        "tailwind_density": 98,
+                        "lucide_density": 92,
+                        "llm_cliche_count": 5,
+                        "radix_shadcn_presence": True,
+                        "framework": "Vite / React / Tailwind",
+                        "builder_sig": "Lovable",
+                        "analytics_present": False,
+                        "css_complexity": "Zero Custom CSS (Tailwind Only)",
+                        "speed_indicator": "Shipped in 15 Minutes"
+                    },
+                    "votes_vibe": 55,
+                    "votes_hand": 0,
+                    "comments": [
+                        {"author": "NoSemicolons", "text": "I literally watched this get built in 5 prompts. 100% vibe.", "date": "2026-07-08T11:45:00Z"}
+                    ],
+                    "date": "2026-07-08T11:50:00Z"
+                }
+            ]
+            save_audits(seed_data)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(seed_data).encode('utf-8'))
             return
 
         self.send_response(404)

@@ -20,8 +20,16 @@
         "votes_vibe": 1,
         "votes_hand": 98,
         "comments": [
-            {"author": "DevPurist", "text": "They manually align vectors to the pixel grid. Def not vibe coded.", "date": "2026-07-08T12:00:00Z"},
-            {"author": "StripeFan", "text": "Their animations are custom canvas shaders. Top tier hand-craft.", "date": "2026-07-08T12:10:00Z"}
+            {
+                "author": "DevPurist",
+                "text": "They manually align vectors to the pixel grid. Def not vibe coded.",
+                "date": "2026-07-08T12:00:00Z"
+            },
+            {
+                "author": "StripeFan",
+                "text": "Their animations are custom canvas shaders. Top tier hand-craft.",
+                "date": "2026-07-08T12:10:00Z"
+            }
         ],
         "date": "2026-07-08T10:00:00Z"
     },
@@ -46,8 +54,16 @@
         "votes_vibe": 142,
         "votes_hand": 2,
         "comments": [
-            {"author": "KarpathyVibes", "text": "This is vibe coding in its purest, most beautiful form.", "date": "2026-07-08T10:30:00Z"},
-            {"author": "PromptEng", "text": "Built in record time, features shipping hourly.", "date": "2026-07-08T11:00:00Z"}
+            {
+                "author": "KarpathyVibes",
+                "text": "This is vibe coding in its purest, most beautiful form.",
+                "date": "2026-07-08T10:30:00Z"
+            },
+            {
+                "author": "PromptEng",
+                "text": "Built in record time, features shipping hourly.",
+                "date": "2026-07-08T11:00:00Z"
+            }
         ],
         "date": "2026-07-08T11:15:00Z"
     },
@@ -72,7 +88,11 @@
         "votes_vibe": 0,
         "votes_hand": 210,
         "comments": [
-            {"author": "iDesigner", "text": "Apple will hire 50 engineers to argue about a 1px border radius. Definitely hand coded.", "date": "2026-07-08T11:20:00Z"}
+            {
+                "author": "iDesigner",
+                "text": "Apple will hire 50 engineers to argue about a 1px border radius. Definitely hand coded.",
+                "date": "2026-07-08T11:20:00Z"
+            }
         ],
         "date": "2026-07-08T11:30:00Z"
     },
@@ -97,7 +117,11 @@
         "votes_vibe": 55,
         "votes_hand": 0,
         "comments": [
-            {"author": "NoSemicolons", "text": "I literally watched this get built in 5 prompts. 100% vibe.", "date": "2026-07-08T11:45:00Z"}
+            {
+                "author": "NoSemicolons",
+                "text": "I literally watched this get built in 5 prompts. 100% vibe.",
+                "date": "2026-07-08T11:45:00Z"
+            }
         ],
         "date": "2026-07-08T11:50:00Z"
     }

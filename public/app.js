@@ -130,6 +130,40 @@ document.addEventListener("DOMContentLoaded", () => {
         renderRegistry(filtered);
     });
 
+    // Reset registry button
+    const btnClearHistory = document.getElementById("btn-clear-history");
+    if (btnClearHistory) {
+        btnClearHistory.addEventListener("click", async () => {
+            if (confirm("⚠️ Are you sure you want to reset the live audit registry? This will delete all user comments, votes, and scanned profiles, reverting back to the clean baseline seed.")) {
+                try {
+                    btnClearHistory.textContent = "⌛ Resetting...";
+                    btnClearHistory.disabled = true;
+                    const res = await fetch(`${API_BASE}/api/clear`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        allAudits = data;
+                        historySearch.value = "";
+                        renderRegistry(allAudits);
+                        if (allAudits.length > 0) {
+                            displayAuditResults(allAudits[0]);
+                        }
+                    } else {
+                        alert("Failed to reset registry.");
+                    }
+                } catch (err) {
+                    console.error("Error clearing registry:", err);
+                    alert("Error resetting registry.");
+                } finally {
+                    btnClearHistory.textContent = "⚠️ Reset";
+                    btnClearHistory.disabled = false;
+                }
+            }
+        });
+    }
+
     // 2. AUDIT SCANNERS (DEEP SCAN & MANUAL SCAN)
     btnScan.addEventListener("click", () => {
         const input = urlInput.value.trim();

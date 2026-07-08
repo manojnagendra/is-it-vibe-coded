@@ -813,6 +813,27 @@ body {
     letter-spacing: 1px;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
     display: flex;
+}
+
+.btn-reset-link {
+    background: none;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: rgba(239, 68, 68, 0.75);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-display);
+}
+
+.btn-reset-link:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
+}
     align-items: center;
     gap: 4px;
 }
