@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Application State
     let activeAudit = null;
     let allAudits = [];
+    let localVotes = JSON.parse(localStorage.getItem("vibecoded_votes") || "{}");
 
     // Initialize Page
     loadRegistry();
@@ -336,6 +337,13 @@ document.addEventListener("DOMContentLoaded", () => {
     async function castVote(voteType) {
         if (!activeAudit) return;
         
+        // Optimistic UI updates - save locally first
+        localVotes[activeAudit.id] = voteType;
+        localStorage.setItem("vibecoded_votes", JSON.stringify(localVotes));
+        
+        // Instant screen update
+        updateVoteBars(activeAudit);
+        
         try {
             const response = await fetch(`${API_BASE}/api/vote`, {
                 method: "POST",
@@ -353,13 +361,19 @@ document.addEventListener("DOMContentLoaded", () => {
             loadRegistry();
         } catch (err) {
             console.error("Error voting:", err);
-            alert("Could not register vote. Make sure backend is running.");
+            // Non-blocking catch: UI is already updated locally.
         }
     }
 
     function updateVoteBars(report) {
-        const votesVibe = report.votes_vibe || 0;
-        const votesHand = report.votes_hand || 0;
+        let votesVibe = report.votes_vibe || 0;
+        let votesHand = report.votes_hand || 0;
+        
+        // Inject local vote to count if server cache is empty/unsynced
+        const myVote = localVotes[report.id];
+        if (myVote === "vibe" && votesVibe === 0) votesVibe = 1;
+        if (myVote === "hand" && votesHand === 0) votesHand = 1;
+        
         const total = votesVibe + votesHand;
         
         let vibePct = 50;
@@ -376,8 +390,28 @@ document.addEventListener("DOMContentLoaded", () => {
         voteHandPct.innerText = `${handPct}%`;
         voteHandBar.style.width = `${handPct}%`;
 
-        voteVibeCount.innerText = votesVibe;
-        voteHandCount.innerText = votesHand;
+        // Toggle buttons state
+        btnVoteVibe.classList.remove("voted");
+        btnVoteHand.classList.remove("voted");
+        btnVoteVibe.disabled = false;
+        btnVoteHand.disabled = false;
+
+        if (myVote === "vibe") {
+            btnVoteVibe.classList.add("voted");
+            btnVoteVibe.disabled = true;
+            btnVoteHand.disabled = true;
+            btnVoteVibe.innerHTML = `🔥 Vibe Coded (Voted: +<span id="vote-vibe-count">${votesVibe}</span>)`;
+            btnVoteHand.innerHTML = `🛠️ Hand Crafted (+<span id="vote-hand-count">${votesHand}</span>)`;
+        } else if (myVote === "hand") {
+            btnVoteHand.classList.add("voted");
+            btnVoteVibe.disabled = true;
+            btnVoteHand.disabled = true;
+            btnVoteVibe.innerHTML = `🔥 Vibe Coded (+<span id="vote-vibe-count">${votesVibe}</span>)`;
+            btnVoteHand.innerHTML = `🛠️ Hand Crafted (Voted: +<span id="vote-hand-count">${votesHand}</span>)`;
+        } else {
+            btnVoteVibe.innerHTML = `🔥 Vibe Coded (+<span id="vote-vibe-count">${votesVibe}</span>)`;
+            btnVoteHand.innerHTML = `🛠️ Hand Crafted (+<span id="vote-hand-count">${votesHand}</span>)`;
+        }
     }
 
     btnVoteVibe.addEventListener("click", () => castVote("vibe"));

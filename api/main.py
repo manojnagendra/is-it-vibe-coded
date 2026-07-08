@@ -427,7 +427,47 @@ def run_vibe_audit(url, name=""):
 
     return report
 
+def reset_audits():
+    if os.path.exists(DATA_FILE):
+        try:
+            os.remove(DATA_FILE)
+        except Exception:
+            pass
+            
+    if os.path.exists(SEED_FILE):
+        try:
+            with open(SEED_FILE, 'r') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
 class handler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+        return
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+        if self.path == "/api/history":
+            audits = load_audits()
+            audits_sorted = sorted(audits, key=lambda x: x.get("date", ""), reverse=True)
+            self.wfile.write(json.dumps(audits_sorted).encode('utf-8'))
+            return
+
+        self.wfile.write(json.dumps({"error": "Not Found"}).encode('utf-8'))
+        return
+
     def do_POST(self):
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -443,97 +483,163 @@ class handler(BaseHTTPRequestHandler):
         try:
             payload = json.loads(post_data)
         except Exception:
-            self.wfile.write(json.dumps({"error": "Invalid JSON"}).encode('utf-8'))
+            payload = {}
+
+        # 1. Clear Registry Route
+        if self.path == "/api/clear":
+            baseline = reset_audits()
+            self.wfile.write(json.dumps(baseline).encode('utf-8'))
             return
 
-        url = payload.get("url", "").strip()
-        name = payload.get("name", "").strip()
-        is_manual = payload.get("manual", False)
-        manual_answers = payload.get("answers", {})
+        # 2. Vote Route
+        if self.path == "/api/vote":
+            audit_id = payload.get("id")
+            vote_type = payload.get("vote")
 
-        if not url and not name:
-            self.wfile.write(json.dumps({"error": "URL or Name required"}).encode('utf-8'))
-            return
+            if not audit_id or vote_type not in ["vibe", "hand"]:
+                self.wfile.write(json.dumps({"error": "ID and valid vote required"}).encode('utf-8'))
+                return
 
-        if is_manual:
-            score = 10
-            if manual_answers.get("tailwind"): score += 20
-            if manual_answers.get("lucide"): score += 15
-            if manual_answers.get("shadcn"): score += 15
-            if manual_answers.get("cliche"): score += 10
-            if manual_answers.get("broken_links"): score += 10
-            if manual_answers.get("no_analytics"): score += 10
+            audits = load_audits()
+            audit_found = False
+            report = {}
+            for audit in audits:
+                if audit["id"] == str(audit_id):
+                    if vote_type == "vibe":
+                        audit["votes_vibe"] = audit.get("votes_vibe", 0) + 1
+                    else:
+                        audit["votes_hand"] = audit.get("votes_hand", 0) + 1
+                    audit_found = True
+                    report = audit
+                    break
             
-            speed = manual_answers.get("speed", "months")
-            if speed == "hours": score += 20
-            elif speed == "weekend": score += 15
-            elif speed == "weeks": score += 8
-
-            score = min(100, max(0, score))
-
-            if score >= 90:
-                grade = "100% Pure Vibe Scaffolding"
-                verdict = f"Vibe coding index of {score}%: User-audited AI prototype! Complete prompt scaffolding indicators detected."
-            elif score >= 75:
-                grade = "AI-Orchestrated Hybrid"
-                verdict = f"Vibe coding index of {score}%: User-audited AI hybrid. Heavy prompt components."
-            elif score >= 50:
-                grade = "AI-Assisted Hybrid Draft"
-                verdict = f"Vibe coding index of {score}%: Human scaffolding with LLM component assistance."
-            elif score >= 25:
-                grade = "Developer-Led Draft"
-                verdict = f"Vibe coding index of {score}%: Human-authored codebase with tiny AI assists."
+            if audit_found:
+                save_audits(audits)
+                self.wfile.write(json.dumps(report).encode('utf-8'))
             else:
-                grade = "Artisan Hand-Crafted Code"
-                verdict = f"Vibe coding index of {score}%: Pure organic hand-craft. Built from the ground up."
+                self.wfile.write(json.dumps({"error": "Audit not found"}).encode('utf-8'))
+            return
 
-            report = {
-                "name": name or url or "Manual Audit App",
-                "url": url or "Manual Audit Profile",
-                "score": score,
-                "grade": grade,
-                "verdict": verdict,
-                "analysis": {
-                    "tailwind_density": 85 if manual_answers.get("tailwind") else 0,
-                    "lucide_density": 80 if manual_answers.get("lucide") else 0,
-                    "llm_cliche_count": 3 if manual_answers.get("cliche") else 0,
-                    "radix_shadcn_presence": manual_answers.get("shadcn", False),
-                    "framework": "React / Tailwind" if manual_answers.get("tailwind") else "Vanilla CSS / HTML",
-                    "builder_sig": "Manual Checklist Audit",
-                    "analytics_present": not manual_answers.get("no_analytics", True),
-                    "css_complexity": "Utility Scaffold" if manual_answers.get("tailwind") else "Bespoke Stylesheet",
-                    "speed_indicator": "Shipped instantly" if speed == "hours" else ("Shipped in weekend" if speed == "weekend" else "Standard engineering time")
+        # 3. Comment Route
+        if self.path == "/api/comment":
+            audit_id = payload.get("id")
+            author = payload.get("author", "").strip() or "AnonymousCoder"
+            text = payload.get("text", "").strip()
+
+            if not audit_id or not text:
+                self.wfile.write(json.dumps({"error": "ID and Comment text required"}).encode('utf-8'))
+                return
+
+            audits = load_audits()
+            audit_found = False
+            report = {}
+            for audit in audits:
+                if audit["id"] == str(audit_id):
+                    if "comments" not in audit:
+                        audit["comments"] = []
+                    
+                    new_comment = {
+                        "author": author[:30],
+                        "text": text[:200],
+                        "date": datetime.now().isoformat() + "Z"
+                    }
+                    audit["comments"].append(new_comment)
+                    audit_found = True
+                    report = audit
+                    break
+
+            if audit_found:
+                save_audits(audits)
+                self.wfile.write(json.dumps(report).encode('utf-8'))
+            else:
+                self.wfile.write(json.dumps({"error": "Audit not found"}).encode('utf-8'))
+            return
+
+        # 4. Audit Scan Route
+        if self.path == "/api/audit":
+            url = payload.get("url", "").strip()
+            name = payload.get("name", "").strip()
+            is_manual = payload.get("manual", False)
+            manual_answers = payload.get("answers", {})
+
+            if not url and not name:
+                self.wfile.write(json.dumps({"error": "URL or Name required"}).encode('utf-8'))
+                return
+
+            if is_manual:
+                score = 10
+                if manual_answers.get("tailwind"): score += 20
+                if manual_answers.get("lucide"): score += 15
+                if manual_answers.get("shadcn"): score += 15
+                if manual_answers.get("cliche"): score += 10
+                if manual_answers.get("broken_links"): score += 10
+                if manual_answers.get("no_analytics"): score += 10
+                
+                speed = manual_answers.get("speed", "months")
+                if speed == "hours": score += 20
+                elif speed == "weekend": score += 15
+                elif speed == "weeks": score += 8
+
+                score = min(100, max(0, score))
+
+                if score >= 90:
+                    grade = "100% Pure Vibe Scaffolding"
+                    verdict = f"Vibe coding index of {score}%: User-audited AI prototype! Complete prompt scaffolding indicators detected."
+                elif score >= 75:
+                    grade = "AI-Orchestrated Hybrid"
+                    verdict = f"Vibe coding index of {score}%: User-audited AI hybrid. Heavy prompt components."
+                elif score >= 50:
+                    grade = "AI-Assisted Hybrid Draft"
+                    verdict = f"Vibe coding index of {score}%: Human scaffolding with LLM component assistance."
+                elif score >= 25:
+                    grade = "Developer-Led Draft"
+                    verdict = f"Vibe coding index of {score}%: Human-authored codebase with tiny AI assists."
+                else:
+                    grade = "Artisan Hand-Crafted Code"
+                    verdict = f"Vibe coding index of {score}%: Pure organic hand-craft. Built from the ground up."
+
+                report = {
+                    "name": name or url or "Manual Audit App",
+                    "url": url or "Manual Audit Profile",
+                    "score": score,
+                    "grade": grade,
+                    "verdict": verdict,
+                    "analysis": {
+                        "tailwind_density": 85 if manual_answers.get("tailwind") else 0,
+                        "lucide_density": 80 if manual_answers.get("lucide") else 0,
+                        "llm_cliche_count": 3 if manual_answers.get("cliche") else 0,
+                        "radix_shadcn_presence": manual_answers.get("shadcn", False),
+                        "framework": "React / Tailwind" if manual_answers.get("tailwind") else "Vanilla CSS / HTML",
+                        "builder_sig": "Manual Checklist Audit",
+                        "analytics_present": not manual_answers.get("no_analytics", True),
+                        "css_complexity": "Utility Scaffold" if manual_answers.get("tailwind") else "Bespoke Stylesheet",
+                        "speed_indicator": "Shipped instantly" if speed == "hours" else ("Shipped in weekend" if speed == "weekend" else "Standard engineering time")
+                    }
                 }
-            }
-        else:
-            report = run_vibe_audit(url, name)
+            else:
+                report = run_vibe_audit(url, name)
 
-        audits = load_audits()
-        existing_idx = next((i for i, x in enumerate(audits) if x["url"].lower() == report["url"].lower()), None)
-        
-        if existing_idx is not None:
-            report["id"] = audits[existing_idx]["id"]
-            report["votes_vibe"] = audits[existing_idx].get("votes_vibe", 0)
-            report["votes_hand"] = audits[existing_idx].get("votes_hand", 0)
-            report["comments"] = audits[existing_idx].get("comments", [])
-            report["date"] = datetime.now().isoformat() + "Z"
-            audits[existing_idx] = report
-        else:
-            report["id"] = str(len(audits) + 1)
-            report["votes_vibe"] = 0
-            report["votes_hand"] = 0
-            report["comments"] = []
-            report["date"] = datetime.now().isoformat() + "Z"
-            audits.append(report)
-        
-        save_audits(audits)
-        self.wfile.write(json.dumps(report).encode('utf-8'))
-        return
+            audits = load_audits()
+            existing_idx = next((i for i, x in enumerate(audits) if x["url"].lower() == report["url"].lower()), None)
+            
+            if existing_idx is not None:
+                report["id"] = audits[existing_idx]["id"]
+                report["votes_vibe"] = audits[existing_idx].get("votes_vibe", 0)
+                report["votes_hand"] = audits[existing_idx].get("votes_hand", 0)
+                report["comments"] = audits[existing_idx].get("comments", [])
+                report["date"] = datetime.now().isoformat() + "Z"
+                audits[existing_idx] = report
+            else:
+                report["id"] = str(len(audits) + 1)
+                report["votes_vibe"] = 0
+                report["votes_hand"] = 0
+                report["comments"] = []
+                report["date"] = datetime.now().isoformat() + "Z"
+                audits.append(report)
+            
+            save_audits(audits)
+            self.wfile.write(json.dumps(report).encode('utf-8'))
+            return
 
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.end_headers()
+        self.wfile.write(json.dumps({"error": "Not Found"}).encode('utf-8'))
         return

@@ -2,24 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/history",
-      "destination": "/api/history.py"
-    },
-    {
-      "source": "/api/audit",
-      "destination": "/api/audit.py"
-    },
-    {
-      "source": "/api/vote",
-      "destination": "/api/vote.py"
-    },
-    {
-      "source": "/api/comment",
-      "destination": "/api/comment.py"
-    },
-    {
-      "source": "/api/clear",
-      "destination": "/api/clear.py"
+      "source": "/api/(.*)",
+      "destination": "/api/main.py"
     },
     {
       "source": "/(.*)",

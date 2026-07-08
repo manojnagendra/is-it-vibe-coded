@@ -681,6 +681,28 @@ body {
     border-color: var(--color-cyan);
 }
 
+.btn-vote.voted {
+    cursor: default !important;
+    color: white !important;
+    opacity: 0.95;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+.btn-vote-vibe.voted {
+    background: rgba(236, 72, 153, 0.25) !important;
+    border-color: var(--color-pink) !important;
+    box-shadow: 0 0 12px rgba(236, 72, 153, 0.2) !important;
+}
+.btn-vote-hand.voted {
+    background: rgba(6, 182, 212, 0.25) !important;
+    border-color: var(--color-cyan) !important;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.2) !important;
+}
+.btn-vote:disabled:not(.voted) {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.02);
+}
+
 /* Comments Card */
 .comments-card {
     padding: 24px 28px;
